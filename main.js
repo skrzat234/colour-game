@@ -7,6 +7,8 @@ let kliknietyKolor = null;
 let isColorSelected = false;
 let currentColor = null;
 let circleRadius = 30; // Promień kółka wokół kursora
+let gracze = ["gracz1", "gracz2", "gracz3"];
+let currentPlayer = 0; // Indeks obecnego gracza
 
 function setup() {
   createCanvas(600, 400);
@@ -18,7 +20,8 @@ function draw() {
   background(220);
 
   // rzad kolorow ukrytych
-  fill(0);
+  fill(0); // Czarny kolor tekstu
+  stroke(0); // Czarna ramka
   textSize(16);
   text("sekwencja do odgadniecia", 20, 30);
   for (let i = 0; i < numColors; i++) {
@@ -27,6 +30,8 @@ function draw() {
   }
 
   // Kolory odgadywane
+  fill(0); // Czarny kolor tekstu
+  stroke(0); // Czarna ramka
   text("kolory odgadywane", 20, 150);
   for (let i = 0; i < numColors; i++) {
     fill(wybraneKolory[i] || "white"); // Domyślny kolor to 'white', gdy null
@@ -37,6 +42,8 @@ function draw() {
   }
 
   // lista dostepnych kolorow
+  fill(0); // Czarny kolor tekstu
+  stroke(0); // Czarna ramka
   text("paleta kolorow do wybrania", 20, 300);
   for (let i = 0; i < availableColors.length; i++) {
     fill(availableColors[i]);
@@ -48,6 +55,10 @@ function draw() {
     fill(currentColor);
     ellipse(mouseX, mouseY, circleRadius * 2, circleRadius * 2); // Kółko pod kursorem
   }
+
+  // Informacja o aktualnym graczu
+  fill(0);
+  text(`Kolej: ${gracze[currentPlayer]}`, 20, 380);
 }
 
 // Funkcja do obsługi kliknięcia na palecie kolorów
@@ -70,22 +81,25 @@ function ustawKolor(idBox) {
     return;
   }
 
-  // Sprawdzanie, czy wybrany kolor jest poprawny dla danego miejsca
-  if (kliknietyKolor !== sekwencja[idBox]) {
-    console.log(`Niepoprawny kolor w tym miejscu!`);
-    return;
-  }
-
-  // Przypisanie wybranego koloru do odpowiedniego miejsca
+  // Tymczasowe ustawienie koloru
   wybraneKolory[idBox] = kliknietyKolor;
-  console.log("Ustawiono kolor:", kliknietyKolor, "na pozycji:", idBox);
+  console.log(`${gracze[currentPlayer]} ustawił kolor ${kliknietyKolor} na pozycji ${idBox}`);
 
-  // Usunięcie koloru z palety
-  usunKolorZPalety(kliknietyKolor);
+  let ustawionyKolor = kliknietyKolor; // Zachowanie klikniętego koloru
+  kliknietyKolor = null; // Resetowanie wybranego koloru
+  isColorSelected = false;
 
-  // Reset klikniętego koloru
-  kliknietyKolor = null;
-  isColorSelected = false; // Dezaktywowanie kółka
+  // Sprawdzenie poprawności po 2 sekundach
+  setTimeout(() => {
+    if (ustawionyKolor === sekwencja[idBox]) {
+      console.log("Kolor poprawny! Gracz kontynuuje swoją kolej.");
+      usunKolorZPalety(ustawionyKolor); // Usuwanie koloru z palety
+    } else {
+      console.log("Kolor niepoprawny! Kolej przechodzi na następnego gracza.");
+      wybraneKolory[idBox] = null; // Usuwanie koloru
+      currentPlayer = (currentPlayer + 1) % gracze.length; // Przełączanie gracza
+    }
+  }, 2000);
 }
 
 // Funkcja do usunięcia koloru z palety
