@@ -1,9 +1,8 @@
 let hiddenColors = ["gray", "gray", "gray", "gray", "gray"];
-let guessColors = ["white", "white", "white", "white", "white"]; //do wywalenia
+let wybraneKolory = [null, null, null, null, null];
 let availableColors = ["red", "green", "blue", "yellow", "purple"];
 let cellSize = 60;
 let numColors = 5;
-let wybraneKolory = [null, null, null, null, null];
 let kliknietyKolor = null;
 let isColorSelected = false; // Zmienna do sprawdzania, czy kolor jest wybrany
 let currentColor = null; // Przechowuje aktualnie wybrany kolor
@@ -47,7 +46,6 @@ function draw() {
   // Kółko pod kursorem, jeśli kolor jest wybrany
   if (isColorSelected && currentColor !== null) {
     fill(currentColor);
-    noStroke();
     ellipse(mouseX, mouseY, circleRadius * 2, circleRadius * 2); // Kółko pod kursorem
   }
 }
