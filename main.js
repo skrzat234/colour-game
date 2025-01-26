@@ -4,8 +4,8 @@ let availableColors = ["red", "green", "blue", "yellow", "purple"];
 let cellSize = 60;
 let numColors = 5;
 let kliknietyKolor = null;
-let isColorSelected = false; // Zmienna do sprawdzania, czy kolor jest wybrany
-let currentColor = null; // Przechowuje aktualnie wybrany kolor
+let isColorSelected = false;
+let currentColor = null;
 let circleRadius = 30; // Promień kółka wokół kursora
 
 function setup() {
@@ -67,6 +67,12 @@ function ustawKolor(idBox) {
 
   if (wybraneKolory[idBox] !== null) {
     console.log("To miejsce jest już zajęte!");
+    return;
+  }
+
+  // Sprawdzanie, czy wybrany kolor jest poprawny dla danego miejsca
+  if (kliknietyKolor !== sekwencja[idBox]) {
+    console.log(`Niepoprawny kolor w tym miejscu!`);
     return;
   }
 
