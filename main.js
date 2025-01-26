@@ -1,11 +1,13 @@
 let hiddenColors = ["gray", "gray", "gray", "gray", "gray"];
-let guessColors = ["white", "white", "white", "white", "white"];
+let guessColors = ["white", "white", "white", "white", "white"]; //do wywalenia
 let availableColors = ["red", "green", "blue", "yellow", "purple"];
 let cellSize = 60;
 let numColors = 5;
 let wybraneKolory = [null, null, null, null, null];
 let kliknietyKolor = null;
-
+let isColorSelected = false; // Zmienna do sprawdzania, czy kolor jest wybrany
+let currentColor = null; // Przechowuje aktualnie wybrany kolor
+let circleRadius = 30; // Promień kółka wokół kursora
 
 function setup() {
   createCanvas(600, 400);
@@ -41,14 +43,20 @@ function draw() {
     fill(availableColors[i]);
     rect(100 + i * cellSize, 320, cellSize, cellSize);
   }
+
+  // Kółko pod kursorem, jeśli kolor jest wybrany
+  if (isColorSelected && currentColor !== null) {
+    fill(currentColor);
+    noStroke();
+    ellipse(mouseX, mouseY, circleRadius * 2, circleRadius * 2); // Kółko pod kursorem
+  }
 }
 
-
-
-
-// Funkcja do obsługi kliknięcia na palecie koloróww
+// Funkcja do obsługi kliknięcia na palecie kolorów
 function wybierzKolor(kolor) {
   kliknietyKolor = kolor;
+  currentColor = kolor; // Ustawienie koloru na ten, który został wybrany
+  isColorSelected = true; // Uaktywnienie kółka wokół kursora
   console.log("Wybrano kolor:", kliknietyKolor);
 }
 
@@ -73,6 +81,7 @@ function ustawKolor(idBox) {
 
   // Reset klikniętego koloru
   kliknietyKolor = null;
+  isColorSelected = false; // Dezaktywowanie kółka
 }
 
 // Funkcja do usunięcia koloru z palety
@@ -83,8 +92,6 @@ function usunKolorZPalety(kolor) {
     console.log("Usunięto kolor z palety:", kolor);
   }
 }
-
-
 
 function mousePressed() {
   // Sprawdzanie kliknięcia na paletę kolorów
