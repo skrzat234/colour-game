@@ -13,7 +13,7 @@ let countdown = -1;
 let countdownBox = null;
 
 function setup() {
-  createCanvas(600, 400);
+  createCanvas(600, 420);
   sekwencja = shuffle([...availableColors]).slice(0, numColors);
   console.log("losowa sekwencja:", sekwencja);
 }
@@ -23,6 +23,7 @@ function draw() {
 
   // Rząd kolorów ukrytych
   fill(0);
+  stroke(0);
   textSize(16);
   text("sekwencja do odgadniecia", 20, 30);
   for (let i = 0; i < numColors; i++) {
@@ -31,6 +32,8 @@ function draw() {
   }
 
   // Kolory odgadywane
+  fill(0);
+  stroke(0);
   text("kolory odgadywane", 20, 150);
   for (let i = 0; i < numColors; i++) {
     fill(wybraneKolory[i] || "white");
@@ -39,9 +42,11 @@ function draw() {
     noFill();
     rect(100 + i * cellSize, 170, cellSize, cellSize);
   }
-
+ 
   // Lista dostępnych kolorów
-  text("paleta kolorow do wybrania", 20, 300);
+  fill(0);
+  stroke(0);
+  text("paleta kolorów do wybrania", 20, 300);
   for (let i = 0; i < availableColors.length; i++) {
     fill(availableColors[i]);
     rect(100 + i * cellSize, 320, cellSize, cellSize);
@@ -66,7 +71,8 @@ function draw() {
   // Informacja o aktualnym graczu
   fill(0);
   textAlign(LEFT, BASELINE);
-  text(`Kolej: ${gracze[currentPlayer]}`, 20, 380);
+  textSize(12);
+  text(`Kolej: ${gracze[currentPlayer]}`, 250, 415);
 }
 
 // Funkcja do obsługi kliknięcia na paletę kolorów
