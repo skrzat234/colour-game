@@ -9,6 +9,8 @@ let currentColor = null;
 let circleRadius = 30; // Promień kółka wokół kursora
 let gracze = ["gracz1", "gracz2", "gracz3"];
 let currentPlayer = 0; // Indeks obecnego gracza
+let countdown = -1; // Timer, który pokaże odliczanie. -1 oznacza brak aktywnego odliczania.
+let countdownBox = null; // Indeks pola, dla którego trwa odliczanie.
 
 function setup() {
   createCanvas(600, 400);
@@ -19,9 +21,8 @@ function setup() {
 function draw() {
   background(220);
 
-  // rzad kolorow ukrytych
-  fill(0); // Czarny kolor tekstu
-  stroke(0); // Czarna ramka
+  // Rząd kolorów ukrytych
+  fill(0);
   textSize(16);
   text("sekwencja do odgadniecia", 20, 30);
   for (let i = 0; i < numColors; i++) {
@@ -30,8 +31,6 @@ function draw() {
   }
 
   // Kolory odgadywane
-  fill(0); // Czarny kolor tekstu
-  stroke(0); // Czarna ramka
   text("kolory odgadywane", 20, 150);
   for (let i = 0; i < numColors; i++) {
     fill(wybraneKolory[i] || "white"); // Domyślny kolor to 'white', gdy null
@@ -41,13 +40,21 @@ function draw() {
     rect(100 + i * cellSize, 170, cellSize, cellSize);
   }
 
-  // lista dostepnych kolorow
-  fill(0); // Czarny kolor tekstu
-  stroke(0); // Czarna ramka
+  // Lista dostępnych kolorów
   text("paleta kolorow do wybrania", 20, 300);
   for (let i = 0; i < availableColors.length; i++) {
     fill(availableColors[i]);
     rect(100 + i * cellSize, 320, cellSize, cellSize);
+  }
+
+  // Timer odliczający
+  if (countdown >= 0 && countdownBox !== null) {
+    fill(0);
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    let x = 100 + countdownBox * cellSize + cellSize / 2;
+    let y = 170 + cellSize + 20; // Pod polem odgadywania
+    text(countdown, x, y); // Wyświetlanie odliczania
   }
 
   // Kółko pod kursorem, jeśli kolor jest wybrany
@@ -58,6 +65,7 @@ function draw() {
 
   // Informacja o aktualnym graczu
   fill(0);
+  textAlign(LEFT, BASELINE);
   text(`Kolej: ${gracze[currentPlayer]}`, 20, 380);
 }
 
@@ -89,17 +97,27 @@ function ustawKolor(idBox) {
   kliknietyKolor = null; // Resetowanie wybranego koloru
   isColorSelected = false;
 
-  // Sprawdzenie poprawności po 2 sekundach
-  setTimeout(() => {
-    if (ustawionyKolor === sekwencja[idBox]) {
-      console.log("Kolor poprawny! Gracz kontynuuje swoją kolej.");
-      usunKolorZPalety(ustawionyKolor); // Usuwanie koloru z palety
-    } else {
-      console.log("Kolor niepoprawny! Kolej przechodzi na następnego gracza.");
-      wybraneKolory[idBox] = null; // Usuwanie koloru
-      currentPlayer = (currentPlayer + 1) % gracze.length; // Przełączanie gracza
+  countdown = 2; // Ustawienie startowego czasu na 2 sekundy
+  countdownBox = idBox; // Zapisanie pola, dla którego trwa odliczanie
+
+  // Odliczanie
+  const interval = setInterval(() => {
+    countdown--;
+    if (countdown < 0) {
+      clearInterval(interval); // Zatrzymanie timera
+      countdownBox = null; // Resetowanie pola odliczania
+
+      // Sprawdzenie poprawności po zakończeniu odliczania
+      if (ustawionyKolor === sekwencja[idBox]) {
+        console.log("Kolor poprawny! Gracz kontynuuje swoją kolej.");
+        usunKolorZPalety(ustawionyKolor); // Usuwanie koloru z palety po odliczaniu
+      } else {
+        console.log("Kolor niepoprawny! Kolej przechodzi na następnego gracza.");
+        wybraneKolory[idBox] = null; // Usuwanie koloru z planszy
+        currentPlayer = (currentPlayer + 1) % gracze.length; // Przełączanie gracza
+      }
     }
-  }, 2000);
+  }, 1000); // Odliczanie co 1 sekundę
 }
 
 // Funkcja do usunięcia koloru z palety
