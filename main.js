@@ -6,16 +6,16 @@ let numColors = 5;
 let kliknietyKolor = null;
 let isColorSelected = false;
 let currentColor = null;
-let circleRadius = 30; // Promień kółka wokół kursora
+let circleRadius = 30;
 let gracze = ["gracz1", "gracz2", "gracz3"];
-let currentPlayer = 0; // Indeks obecnego gracza
-let countdown = -1; // Timer, który pokaże odliczanie. -1 oznacza brak aktywnego odliczania.
-let countdownBox = null; // Indeks pola, dla którego trwa odliczanie.
+let currentPlayer = 0;
+let countdown = -1;
+let countdownBox = null;
 
 function setup() {
   createCanvas(600, 400);
   sekwencja = shuffle([...availableColors]).slice(0, numColors);
-  console.log("losowa sekwencja:", sekwencja); //F12
+  console.log("losowa sekwencja:", sekwencja);
 }
 
 function draw() {
@@ -33,7 +33,7 @@ function draw() {
   // Kolory odgadywane
   text("kolory odgadywane", 20, 150);
   for (let i = 0; i < numColors; i++) {
-    fill(wybraneKolory[i] || "white"); // Domyślny kolor to 'white', gdy null
+    fill(wybraneKolory[i] || "white");
     rect(100 + i * cellSize, 170, cellSize, cellSize);
     stroke(0);
     noFill();
@@ -53,14 +53,14 @@ function draw() {
     textSize(12);
     textAlign(CENTER, CENTER);
     let x = 100 + countdownBox * cellSize + cellSize / 2;
-    let y = 170 + cellSize + 20; // Pod polem odgadywania
-    text(countdown, x, y); // Wyświetlanie odliczania
+    let y = 170 + cellSize + 20;
+    text(countdown, x, y);
   }
 
-  // Kółko pod kursorem, jeśli kolor jest wybrany
+  // Kółko pod kursorem
   if (isColorSelected && currentColor !== null) {
     fill(currentColor);
-    ellipse(mouseX, mouseY, circleRadius * 2, circleRadius * 2); // Kółko pod kursorem
+    ellipse(mouseX, mouseY, circleRadius * 2, circleRadius * 2);
   }
 
   // Informacja o aktualnym graczu
@@ -69,17 +69,17 @@ function draw() {
   text(`Kolej: ${gracze[currentPlayer]}`, 20, 380);
 }
 
-// Funkcja do obsługi kliknięcia na palecie kolorów
+// Funkcja do obsługi kliknięcia na paletę kolorów
 function wybierzKolor(kolor) {
   kliknietyKolor = kolor;
-  currentColor = kolor; // Ustawienie koloru na ten, który został wybrany
-  isColorSelected = true; // Uaktywnienie kółka wokół kursora
+  currentColor = kolor;
+  isColorSelected = true;
   console.log("Wybrano kolor:", kliknietyKolor);
 }
 
-// Funkcja do obsługi kliknięcia na białe miejsce na planszy
+// Funkcja do obsługi kliknięcia na planszę
 function ustawKolor(idBox) {
-  if (kliknietyKolor === null) {
+  if (kliknietyKolor === null && gracze[currentPlayer] === "gracz1") {
     console.log("Najpierw wybierz kolor z palety!");
     return;
   }
@@ -89,48 +89,76 @@ function ustawKolor(idBox) {
     return;
   }
 
-  // Tymczasowe ustawienie koloru
-  wybraneKolory[idBox] = kliknietyKolor;
-  console.log(`${gracze[currentPlayer]} ustawił kolor ${kliknietyKolor} na pozycji ${idBox}`);
+  let kolorDoUstawienia =
+    gracze[currentPlayer] === "gracz1" ? kliknietyKolor : botWybierzKolor();
 
-  let ustawionyKolor = kliknietyKolor; // Zachowanie klikniętego koloru
-  kliknietyKolor = null; // Resetowanie wybranego koloru
-  isColorSelected = false;
+  wybraneKolory[idBox] = kolorDoUstawienia;
+  console.log(`${gracze[currentPlayer]} ustawił kolor ${kolorDoUstawienia} na pozycji ${idBox}`);
 
-  countdown = 2; // Ustawienie startowego czasu na 2 sekundy
-  countdownBox = idBox; // Zapisanie pola, dla którego trwa odliczanie
+  let ustawionyKolor = kolorDoUstawienia;
+  if (gracze[currentPlayer] === "gracz1") {
+    kliknietyKolor = null;
+    isColorSelected = false;
+  }
 
-  // Odliczanie
+  countdown = 2;
+  countdownBox = idBox;
+
   const interval = setInterval(() => {
     countdown--;
     if (countdown < 0) {
-      clearInterval(interval); // Zatrzymanie timera
-      countdownBox = null; // Resetowanie pola odliczania
+      clearInterval(interval);
+      countdownBox = null;
 
-      // Sprawdzenie poprawności po zakończeniu odliczania
       if (ustawionyKolor === sekwencja[idBox]) {
         console.log("Kolor poprawny! Gracz kontynuuje swoją kolej.");
-        usunKolorZPalety(ustawionyKolor); // Usuwanie koloru z palety po odliczaniu
+        usunKolorZPalety(ustawionyKolor);
+
+        if (gracze[currentPlayer] !== "gracz1") {
+          botTura(); // Bot kontynuuje swoją turę
+        }
       } else {
         console.log("Kolor niepoprawny! Kolej przechodzi na następnego gracza.");
-        wybraneKolory[idBox] = null; // Usuwanie koloru z planszy
-        currentPlayer = (currentPlayer + 1) % gracze.length; // Przełączanie gracza
+        wybraneKolory[idBox] = null;
+        currentPlayer = (currentPlayer + 1) % gracze.length;
+        if (gracze[currentPlayer] !== "gracz1") {
+          botTura();
+        }
       }
     }
-  }, 1000); // Odliczanie co 1 sekundę
+  }, 1000);
+}
+
+function botWybierzKolor() {
+  let index = Math.floor(Math.random() * availableColors.length);
+  return availableColors[index];
+}
+
+function botWybierzPole() {
+  let pustePola = wybraneKolory.map((kolor, i) => (kolor === null ? i : null)).filter(i => i !== null);
+  let index = Math.floor(Math.random() * pustePola.length);
+  return pustePola[index];
+}
+
+function botTura() {
+  let pole = botWybierzPole();
+  let kolor = botWybierzKolor();
+  console.log(`Bot ${gracze[currentPlayer]} wybiera kolor ${kolor} i pole ${pole}`);
+  ustawKolor(pole);
 }
 
 // Funkcja do usunięcia koloru z palety
 function usunKolorZPalety(kolor) {
   const index = availableColors.indexOf(kolor);
   if (index !== -1) {
-    availableColors.splice(index, 1); // Usuwa kolor z palety
+    availableColors.splice(index, 1);
     console.log("Usunięto kolor z palety:", kolor);
   }
 }
 
 function mousePressed() {
-  // Sprawdzanie kliknięcia na paletę kolorów
+  if (gracze[currentPlayer] !== "gracz1") return;
+
   for (let i = 0; i < availableColors.length; i++) {
     let x = 100 + i * cellSize;
     let y = 320;
@@ -139,7 +167,6 @@ function mousePressed() {
     }
   }
 
-  // Sprawdzanie kliknięcia na białe pola
   for (let i = 0; i < numColors; i++) {
     let x = 100 + i * cellSize;
     let y = 170;
